@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/assets/satoshi.woff2') format('woff2');
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+:root {
+  font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --presenceUsernameColor: #ffffff;
+  --presenceStatusColor: rgba(255, 255, 255, 0.7);
+  --presenceContainerBackground: rgba(27, 27, 27, 0.2);
+  --presenceContainerBorder: 2px solid rgba(27, 27, 27, 0.1);
+  --textColor: #ffffff;
+  --textColorDarker: rgba(255, 255, 255, 0.5);
+  --iconColor: #e2b309;
+  --backgroundColor: #080808;
+  --containerColor: rgba(27, 27, 27, 0.5);
+  --containerBlur: 10px;
+  --profileBorderColor: rgba(255, 255, 255, 0.3);
+  --containerRadius: 20px;
+  --containerWidth: 40rem;
+  --containerPadding: 35px 15px;
+  --volumeBackgroundcolor: rgba(27, 27, 27, 0.5);
+  --volumeBorder: 2px solid rgba(27, 27, 27, 0.45);
+  --colorUsernameGlow: 0px 0px 16.5px #ffffff;
+  --profileViewsContainerBorder: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #080808;
+  color: #ffffff;
+  font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: #ffffff;
+  color: #080808;
+}
+
+::-moz-selection {
+  background: #ffffff;
+  color: #080808;
+}
+
+/* Background image scaling */
+.guns-bg {
+  position: fixed;
+  height: 112%;
+  width: 112%;
+  left: -6%;
+  top: -6%;
+  background-size: cover;
+  background-position: 50%;
+  z-index: -1;
+}
+
+/* Night time atmospheric overlay */
+.guns-night-overlay {
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.55);
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* Base background solid layer */
+.guns-base-bg {
+  height: 100%;
+  width: 100%;
+  z-index: -2;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #080808;
+}
+
+/* Volume widget */
+.guns-volume-box {
+  padding: 12px;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 50;
+  background-color: var(--volumeBackgroundcolor);
+  border: var(--volumeBorder);
+  border-radius: 15px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  cursor: pointer;
+  transition: width 0.35s ease, background-color 0.25s ease;
+  width: 32px;
+  gap: 15px;
+  height: 32px;
+  overflow: hidden;
+  box-sizing: content-box;
+}
+
+.guns-volume-box:hover {
+  width: 160px;
+}
+
+/* Custom slider input */
+input[type="range"].guns-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 90px;
+  height: 4px;
+}
+
+input[type="range"].guns-slider::-webkit-slider-runnable-track {
+  background: rgba(255, 255, 255, 0.3);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"].guns-slider::-moz-range-track {
+  background: rgba(255, 255, 255, 0.3);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"].guns-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  margin-top: -3px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+input[type="range"].guns-slider::-moz-range-thumb {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Sparkle Yellow Text Effect */
+.sparkle-username {
+  position: relative;
+  text-shadow: 0px 0px 16.5px #ffffff;
+  display: inline-block;
+}
+
+.sparkle-username::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/assets/sparkle_yellow.gif');
+  background-size: cover;
+  background-repeat: repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+/* Custom Tooltip */
+.guns-tooltip {
+  position: absolute;
+  z-index: 99999999;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px) scale(0.95);
+  padding: 0.3rem 0.7rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  color: #fafafa;
+  background: rgba(20, 20, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .guns-tooltip,
+.hover-parent:hover .guns-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
