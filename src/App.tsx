@@ -396,11 +396,11 @@ export default function App() {
                 {/* 3. GitHub Link */}
                 <div className="flex">
                   <a
-                    href="https://github.com/yagami-light-creator"
+                    href="https://github.com/mrom20w-star"
                     target="_blank"
                     rel="nofollow ugc noopener noreferrer"
                     className="flex transition-transform duration-300 hover:scale-110"
-                    title="GitHub"
+                    title="GitHub (mrom20w-star)"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
