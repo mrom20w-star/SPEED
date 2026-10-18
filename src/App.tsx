@@ -12,7 +12,6 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(false);
   const [showUidTooltip, setShowUidTooltip] = useState(false);
   const [showViewsTooltip, setShowViewsTooltip] = useState(false);
-  const [typedTitle, setTypedTitle] = useState('');
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -50,7 +49,8 @@ export default function App() {
       });
   }, []);
 
-  // Guns.lol animated title algorithm for "SPEED 33"
+  // Guns.lol animated title in browser tab:
+  // Types and untypes "@SPEED 33" next to the purple gun favicon
   useEffect(() => {
     const target = 'SPEED 33';
     let r = 0;
@@ -66,7 +66,6 @@ export default function App() {
 
       r = a ? r + 1 : r - 1;
       const current = r === 0 ? '' : target.slice(0, r);
-      setTypedTitle(current);
       document.title = '@' + current;
     }, 380);
 
@@ -78,7 +77,6 @@ export default function App() {
     setEntered(true);
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
-      // Start audio asynchronously so it never hangs or lags the UI
       audioRef.current.play().catch(() => {});
     }
   };
@@ -134,20 +132,7 @@ export default function App() {
       {/* Night atmospheric overlay */}
       <div className="guns-night-overlay" />
 
-      {/* Top Floating Guns.lol Badge: Official Pistol Logo + @SPEED 33 Animated Typing */}
-      <div className="fixed top-4 left-1/2 z-40 -translate-x-1/2 flex items-center gap-2.5 rounded-full border border-white/20 bg-[#141414]/80 px-4 py-1.5 shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-white/40">
-        <img
-          src="/assets/guns_logo_512.png"
-          alt="guns.lol logo"
-          className="h-4 w-4 object-contain brightness-125 select-none drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]"
-        />
-        <span className="text-xs font-semibold tracking-wider text-white">
-          @<span className="text-white">{typedTitle}</span>
-          <span className="inline-block w-1.5 animate-pulse text-white/70">|</span>
-        </span>
-      </div>
-
-      {/* "click to enter..." Initial Overlay (Fast, smooth, instant response) */}
+      {/* "click to enter..." Initial Overlay */}
       <div
         onClick={handleEnter}
         className={`fixed inset-0 z-[9999] flex cursor-pointer flex-col items-center justify-center gap-3.5 bg-black/75 backdrop-blur-[15px] transition-all duration-400 ease-out ${
@@ -188,7 +173,7 @@ export default function App() {
               </g>
             </svg>
           ) : (
-            /* Active Speaker SVG (exact guns.lol mask) */
+            /* Active Speaker SVG */
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1em"
@@ -237,9 +222,9 @@ export default function App() {
       </div>
 
       {/* Main Profile Page Content */}
-      <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-[50px_15px] pt-[75px] box-border">
+      <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-[50px_15px] box-border">
         <div className="relative z-10 flex w-full max-w-[40rem] flex-col items-center gap-[15px]">
-          {/* Profile Card Container */}
+          {/* Profile Card Container (Exact replica of the screenshot) */}
           <div
             className={`relative w-full rounded-[20px] bg-[#1b1b1b]/50 p-[35px_15px] pb-[52px] backdrop-blur-[10px] border-2 border-white/30 transition-all duration-600 ease-out ${
               entered
@@ -248,35 +233,35 @@ export default function App() {
             }`}
           >
             <div className="flex w-full flex-col items-center">
-              {/* Avatar with Discord Profile Picture */}
-              <div className="relative flex">
-                <div className="relative">
-                  <img
-                    src="/assets/discord_avatar.png"
-                    alt="Discord Avatar"
-                    className="h-[118px] w-[118px] rounded-full object-cover select-none shadow-2xl ring-2 ring-white/20"
-                  />
-                  {/* Discord Online Indicator Dot */}
-                  <div
-                    className="absolute bottom-1 right-1 h-6 w-6 rounded-full border-[3px] border-[#1b1b1b] bg-[#23a55a]"
-                    title="Online on Discord"
-                  />
-                </div>
+              {/* Avatar with Discord Wings Avatar Decoration */}
+              <div className="relative flex items-center justify-center mt-2">
+                {/* Majestic Feathered Angel Wings Decoration */}
+                <img
+                  src="/assets/avatar_decoration_wings.png"
+                  alt="Avatar Wings Decoration"
+                  className="pointer-events-none absolute z-10 w-[176px] h-[176px] -top-[28px] max-w-none select-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]"
+                />
+                {/* Circular Profile Avatar (User's Discord Avatar) */}
+                <img
+                  src="/assets/discord_avatar.png"
+                  alt="Discord Avatar"
+                  className="relative z-0 h-[118px] w-[118px] rounded-full object-cover select-none shadow-2xl"
+                />
               </div>
 
-              {/* Display Name and Description 33 */}
-              <div className="mt-[7px] flex max-w-[27rem] flex-col items-center justify-center text-center">
-                {/* Username with Sparkle Yellow Effect & UID Tooltip */}
+              {/* Display Name and Subtitle (ITS LIGHT / ITS LIGHT ZONE exactly as in the screenshot) */}
+              <div className="mt-[10px] flex max-w-[27rem] flex-col items-center justify-center text-center">
+                {/* Name: ITS LIGHT with Sparkle Yellow Effect & UID Tooltip */}
                 <div
                   className="relative inline-flex items-center justify-center cursor-default group/uid"
                   onMouseEnter={() => setShowUidTooltip(true)}
                   onMouseLeave={() => setShowUidTooltip(false)}
                 >
-                  <h1 className="sparkle-username m-0 text-[39.5px] font-[600] text-white">
-                    SPEED 33
+                  <h1 className="sparkle-username m-0 text-[39.5px] font-[600] text-white tracking-wide">
+                    ITS LIGHT
                   </h1>
 
-                  {/* Tooltip: UID 1392685347967864956 */}
+                  {/* Tooltip: UID 1,399,106 */}
                   <div
                     className={`guns-tooltip ${
                       showUidTooltip ? '!opacity-100 !scale-100 !translate-y-0' : ''
@@ -286,63 +271,74 @@ export default function App() {
                       backgroundColor: 'rgba(20, 20, 20, 0.85)',
                     }}
                   >
-                    UID 1392685347967864956
+                    UID 1,399,106
                   </div>
                 </div>
 
-                {/* Subtitle / Description: "33" */}
+                {/* Subtitle: ITS LIGHT ZONE */}
                 <h3 className="m-0 mt-[5px] text-[19px] font-[570] text-white">
-                  33
+                  ITS LIGHT ZONE
                 </h3>
               </div>
 
-              {/* Connected Discord Profile Box */}
+              {/* Connected Discord Profile Box (Exact match from screenshot: 5stg, ⚡ STG, ⯁ Balance, last seen unknown) */}
               <div className="mt-[20px] flex w-full max-w-[28rem] justify-center">
                 <a
                   href="https://discord.com/users/1392685347967864956"
                   target="_blank"
                   rel="noreferrer"
-                  className="group/discord flex w-full items-center gap-3.5 rounded-[22px] border-2 border-[#1b1b1b]/30 bg-[#1b1b1b]/30 p-3.5 transition-all duration-300 hover:border-white/30 hover:bg-[#1b1b1b]/50"
+                  className="group/discord flex w-full items-center gap-3.5 rounded-[22px] border-2 border-[#1b1b1b]/30 bg-[#1b1b1b]/35 p-3 px-4 transition-all duration-300 hover:border-white/30 hover:bg-[#1b1b1b]/55"
                 >
-                  {/* Discord Mini Avatar */}
+                  {/* Discord Avatar with status ring */}
                   <div className="relative">
                     <img
-                      src="/assets/discord_avatar.png"
+                      src="/assets/avatar.webp"
                       alt="Discord"
-                      className="h-12 w-12 rounded-full object-cover ring-1 ring-white/20"
+                      className="h-11 w-11 rounded-full object-cover ring-1 ring-white/10"
                     />
-                    <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-[#1b1b1b] bg-[#23a55a]" />
+                    {/* Status ring at bottom right */}
+                    <div
+                      className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#1b1b1b] bg-[#747f8d]"
+                      title="Offline"
+                    />
                   </div>
 
-                  {/* Discord User Info */}
+                  {/* User info */}
                   <div className="flex flex-1 flex-col justify-center text-left">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <span className="text-[16px] font-bold text-white group-hover/discord:text-[#e2b309] transition-colors">
-                        Speed
+                        5stg
                       </span>
-                      {/* Discord Nitro Badge */}
-                      <span
-                        className="flex items-center rounded bg-[#5865f2]/30 px-1.5 py-0.5 text-[10px] font-semibold text-[#5865f2]"
-                        title="Discord Nitro"
-                      >
-                        NITRO
-                      </span>
-                    </div>
-                    <span className="text-[13px] text-white/60">
-                      @mrwan0741 • <span className="text-[#23a55a]">Online</span>
-                    </span>
-                  </div>
 
-                  {/* Guild Tag */}
-                  <div className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-[#e2b309]">
-                    #SPEED 33
+                      {/* Clan tag: ⚡ STG */}
+                      <span className="flex items-center gap-1 rounded bg-black/40 px-1.5 py-0.5 text-xs font-bold text-white">
+                        <span className="text-yellow-400">⚡</span> STG
+                      </span>
+
+                      {/* HypeSquad Balance Cyan Triangle/Diamond Badge */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="14"
+                        height="14"
+                        className="text-[#45ddc0]"
+                        fill="currentColor"
+                      >
+                        <title>HypeSquad Balance</title>
+                        <path d="M12 2L2 12l10 10 10-10L12 2zm0 4.5l6.5 5.5-6.5 5.5-6.5-5.5L12 6.5z" />
+                      </svg>
+                    </div>
+
+                    {/* Subtext: last seen unknown */}
+                    <span className="text-[12.5px] italic text-white/50">
+                      last seen unknown
+                    </span>
                   </div>
                 </a>
               </div>
 
-              {/* Social Links Row:
-                  Discord | TikTok | GitHub | Triangle (TikAlert) on the FAR RIGHT */}
-              <div className="mt-[30px] flex w-full flex-wrap items-center justify-center gap-[14px]">
+              {/* Social Links Row (Exact icons and order from screenshot: Discord, TikTok, GitHub, TikAlert) */}
+              <div className="mt-[28px] flex w-full flex-wrap items-center justify-center gap-[14px]">
                 {/* 1. Discord Link */}
                 <div className="flex">
                   <a
@@ -350,7 +346,7 @@ export default function App() {
                     target="_blank"
                     rel="nofollow ugc noopener noreferrer"
                     className="flex transition-transform duration-300 hover:scale-110"
-                    title="Discord Profile (Speed)"
+                    title="Discord"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -375,7 +371,7 @@ export default function App() {
                     target="_blank"
                     rel="nofollow ugc noopener noreferrer"
                     className="flex transition-transform duration-300 hover:scale-110"
-                    title="TikTok (@mrwan3333)"
+                    title="TikTok"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -400,7 +396,7 @@ export default function App() {
                     target="_blank"
                     rel="nofollow ugc noopener noreferrer"
                     className="flex transition-transform duration-300 hover:scale-110"
-                    title="GitHub (mrom20w-star)"
+                    title="GitHub"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -420,7 +416,7 @@ export default function App() {
                   </a>
                 </div>
 
-                {/* 4. Triangle Image (صورة المثلث على اليمين خالص) */}
+                {/* 4. TikAlert Red Triangle Icon */}
                 <div className="flex">
                   <a
                     href="https://tikalert-eg.com/ITSLIGHT"
@@ -431,7 +427,7 @@ export default function App() {
                   >
                     <img
                       src="/assets/tikalert_icon.webp"
-                      alt="Triangle Icon"
+                      alt="TikAlert"
                       className="h-[40px] w-[40px] object-cover"
                       style={{ filter: 'drop-shadow(#ea2b2b 1px 0 7px)' }}
                     />
