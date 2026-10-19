@@ -9,9 +9,11 @@ export default function App() {
   const [entered, setEntered] = useState(() => Boolean(typeof window !== 'undefined' && (window as any).__entered));
   const [views, setViews] = useState<number>(0);
   const [volume, setVolume] = useState<number>(1);
+  const [prevVolume, setPrevVolume] = useState<number>(1);
   const [isMuted, setIsMuted] = useState(false);
   const [showUidTooltip, setShowUidTooltip] = useState(false);
   const [showViewsTooltip, setShowViewsTooltip] = useState(false);
+  const [isVolumeHovered, setIsVolumeHovered] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -102,36 +104,45 @@ export default function App() {
     }
   };
 
-  // Handle volume changes
+  // Handle volume changes from slider (تعلية وتوطية الصوت بسلاسة ودقة)
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value) / 100;
     setVolume(val);
-    if (isMuted && val > 0) {
+    if (val > 0) {
       setIsMuted(false);
+      setPrevVolume(val);
+    } else {
+      setIsMuted(true);
     }
     if (audioRef.current) {
       audioRef.current.volume = val;
     }
   };
 
-  // Toggle mute
+  // Toggle mute / restore previous volume
   const toggleMute = () => {
-    if (isMuted) {
+    if (isMuted || volume === 0) {
+      const restored = prevVolume > 0 ? prevVolume : 0.8;
       setIsMuted(false);
+      setVolume(restored);
       if (audioRef.current) {
-        audioRef.current.volume = volume > 0 ? volume : 0.5;
+        audioRef.current.volume = restored;
       }
     } else {
+      setPrevVolume(volume);
       setIsMuted(true);
+      setVolume(0);
       if (audioRef.current) {
         audioRef.current.volume = 0;
       }
     }
   };
 
+  const currentVolumePercent = isMuted ? 0 : Math.round(volume * 100);
+
   return (
-    <div className="relative min-h-screen w-full select-none overflow-hidden bg-[#080808] font-['Satoshi'] text-white">
-      {/* Background audio element (optimized 650KB, instant playback) */}
+    <div className="relative min-h-screen w-full select-none overflow-hidden font-['Satoshi'] text-white">
+      {/* Background audio element (optimized, instant playback) */}
       <audio
         ref={audioRef}
         src="/assets/audio.mp3"
@@ -139,24 +150,25 @@ export default function App() {
         preload="auto"
       />
 
-      {/* Base solid background layer */}
-      <div className="guns-base-bg" />
+      {/* 1. Base solid dark background layer */}
+      <div className="fixed inset-0 -z-20 bg-[#080808]" />
 
-      {/* Exact guns.lol/light_stg background image */}
+      {/* 2. Background image: Neon Speed Crown Energy (مضبوطة في الظهر بالكامل بمركزية وجودة عالية) */}
       <div
-        className="guns-bg"
+        className="fixed inset-0 -z-10 pointer-events-none select-none"
         style={{
-          backgroundImage: "url('/assets/guns_bg.webp')",
-          backgroundPosition: '50% 50%',
+          backgroundImage: "url('/assets/speed_neon_bg.webp')",
+          backgroundPosition: 'center center',
           backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
         }}
       />
 
-      {/* Night atmospheric overlay (exact guns.lol light_stg layer) */}
+      {/* 3. Night atmospheric overlay with balanced opacity to let neon glow shine through */}
       <div
-        className="guns-night-overlay"
+        className="fixed inset-0 -z-10 pointer-events-none"
         style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.55)',
+          backgroundColor: 'rgba(0, 0, 0, 0.28)',
         }}
       />
 
@@ -172,24 +184,37 @@ export default function App() {
         </div>
       )}
 
-      {/* Volume Control Widget (Top Left) */}
-      <div className="guns-volume-box group">
-        <span
+      {/* Volume Control Widget (Top Left) — exact guns.lol style with smooth expand & live slider */}
+      <div
+        onMouseEnter={() => setIsVolumeHovered(true)}
+        onMouseLeave={() => setIsVolumeHovered(false)}
+        className="fixed top-[15px] left-[15px] z-50 flex items-center gap-3.5 rounded-[15px] border-2 border-[rgba(27,27,27,0.45)] bg-[rgba(27,27,27,0.65)] backdrop-blur-[10px] px-3 py-2.5 shadow-2xl transition-all duration-300 ease-out"
+        style={{
+          width: isVolumeHovered ? '180px' : '48px',
+          height: '48px',
+          boxSizing: 'border-box',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Speaker Icon Button */}
+        <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             toggleMute();
           }}
-          className="flex cursor-pointer text-[29px] text-white active:translate-y-0.5"
-          title={isMuted ? 'Unmute' : 'Mute'}
+          className="flex flex-shrink-0 cursor-pointer text-[24px] text-white hover:text-white/80 active:scale-95 transition-transform"
+          title={isMuted || currentVolumePercent === 0 ? 'Unmute' : 'Mute'}
+          aria-label="Toggle mute"
         >
-          {isMuted || volume === 0 ? (
+          {isMuted || currentVolumePercent === 0 ? (
             /* Muted Speaker SVG */
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1em"
               height="1em"
               viewBox="0 0 48 48"
-              className="min-w-[30px]"
+              className="min-w-[24px]"
             >
               <g fill="none" stroke="currentColor" strokeWidth="4">
                 <path
@@ -200,14 +225,36 @@ export default function App() {
                 <path strokeLinecap="round" d="m32 20l12 12m0-12L32 32" />
               </g>
             </svg>
-          ) : (
-            /* Active Speaker SVG */
+          ) : currentVolumePercent < 50 ? (
+            /* Low Volume Speaker SVG */
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="1em"
               height="1em"
               viewBox="0 0 48 48"
-              className="min-w-[30px]"
+              className="min-w-[24px]"
+            >
+              <g fill="none" stroke="currentColor" strokeWidth="4">
+                <path
+                  fill="currentColor"
+                  strokeLinejoin="round"
+                  d="M24 6v36c-7 0-12.201-9.16-12.201-9.16H6a2 2 0 0 1-2-2V17.01a2 2 0 0 1 2-2h5.799S17 6 24 6Z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M32 18a7 7 0 0 1 0 12"
+                />
+              </g>
+            </svg>
+          ) : (
+            /* High Volume Speaker SVG (exact guns.lol mask) */
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
+              height="1em"
+              viewBox="0 0 48 48"
+              className="min-w-[24px]"
             >
               <defs>
                 <mask id="ipTVolumeNotice0">
@@ -232,46 +279,61 @@ export default function App() {
               <path fill="currentColor" d="M0 0h48v48H0z" mask="url(#ipTVolumeNotice0)" />
             </svg>
           )}
-        </span>
+        </button>
 
-        {/* Expandable Slider */}
-        <div className="flex items-center">
+        {/* Expandable Slider Container with Custom Track & Real-time Fill */}
+        <div className="relative flex flex-1 items-center min-w-[100px] h-4">
+          {/* Background rail */}
+          <div className="absolute left-0 right-0 h-1 rounded-full bg-white/20" />
+          {/* Filled active track */}
+          <div
+            className="absolute left-0 h-1 rounded-full bg-white"
+            style={{ width: `${currentVolumePercent}%` }}
+          />
+          {/* Native HTML Range Input for perfect cross-device scrubbing */}
           <input
             type="range"
             min="0"
             max="100"
             step="1"
-            value={isMuted ? 0 : Math.round(volume * 100)}
+            value={currentVolumePercent}
             onChange={handleVolumeChange}
-            className="guns-slider"
-            aria-label="Volume"
+            className="relative z-10 w-full opacity-0 cursor-pointer h-4"
+            aria-label="Volume Slider"
+          />
+          {/* Custom thumb indicator */}
+          <div
+            className="pointer-events-none absolute h-2.5 w-2.5 -ml-1.5 rounded-full bg-white shadow-md"
+            style={{ left: `${currentVolumePercent}%` }}
           />
         </div>
       </div>
 
       {/* Main Profile Page Content */}
-      <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-[50px_15px] box-border">
+      <div className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center p-[50px_15px] box-border">
         <div className="relative z-10 flex w-full max-w-[40rem] flex-col items-center gap-[15px]">
-          {/* Profile Card Container (Exact guns.lol translucent glass & border) */}
-          <div className="relative w-full rounded-[20px] bg-[#1b1b1b]/50 p-[35px_15px] pb-[52px] backdrop-blur-[10px] border-2 border-white/30 shadow-2xl">
+          {/* Profile Card Container (Exact guns.lol frosted glass background: rgba(27, 27, 27, 0.5), no harsh border) */}
+          <div className="relative w-full rounded-[20px] bg-[rgba(27,27,27,0.5)] p-[35px_15px] pb-[52px] backdrop-blur-[10px] border-0 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             <div className="flex w-full flex-col items-center">
-              {/* Avatar with Discord Wings Decoration */}
-              <div className="relative flex items-center justify-center mt-6 mb-7">
-                {/* Feathered Wings Decoration lifted higher up */}
-                <img
-                  src="/assets/avatar_decoration_wings.webp"
-                  alt="Avatar Wings Decoration"
-                  className="pointer-events-none absolute z-10 w-[185px] h-[185px] -top-[48px] max-w-none select-none drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]"
-                />
-                {/* Circular Profile Avatar (User's Discord Avatar) */}
-                <img
-                  src="/assets/discord_avatar.webp"
-                  alt="Discord Avatar"
-                  className="relative z-0 h-[118px] w-[118px] rounded-full object-cover select-none shadow-2xl ring-2 ring-white/15"
-                />
+              {/* Perfectly Proportioned Avatar & Wings Frame (Exact 1:1 Discord Alignment) */}
+              <div className="relative flex items-center justify-center mt-3 mb-6">
+                <div className="relative w-[120px] h-[120px] flex items-center justify-center">
+                  {/* Circular Profile Avatar / Logo */}
+                  <img
+                    src="/assets/discord_avatar.webp"
+                    alt="Profile Avatar"
+                    className="w-[120px] h-[120px] rounded-full object-cover select-none shadow-2xl relative z-10"
+                  />
+                  {/* Wings Decoration — perfectly positioned to frame the circular avatar seamlessly */}
+                  <img
+                    src="/assets/avatar_decoration_wings.webp"
+                    alt="Wings Decoration"
+                    className="pointer-events-none absolute w-[146px] h-[146px] -top-[13px] -left-[13px] z-20 max-w-none select-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
+                  />
+                </div>
               </div>
 
-              {/* Display Name and Subtitle: Speed33 with full clarity */}
+              {/* Display Name and Subtitle: Speed33 */}
               <div className="mt-[2px] flex max-w-[27rem] flex-col items-center justify-center text-center">
                 {/* Name: Speed33 with Sparkle Yellow Effect & Glow */}
                 <div
@@ -303,20 +365,20 @@ export default function App() {
                 </h3>
               </div>
 
-              {/* Connected Discord Profile Box (Exact guns.lol styling) */}
+              {/* Connected Discord Profile Box (Exact guns.lol background color: rgba(27, 27, 27, 0.2)) */}
               <div className="mt-[20px] flex w-full max-w-[28rem] justify-center">
                 <a
                   href="https://discord.com/users/1392685347967864956"
                   target="_blank"
                   rel="noreferrer"
-                  className="group/discord flex w-full items-center gap-3.5 rounded-[22px] border-2 border-[#1b1b1b]/30 bg-[#1b1b1b]/35 p-3 px-4 backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-[#1b1b1b]/55"
+                  className="group/discord flex w-full items-center gap-3.5 rounded-[22px] border-2 border-[rgba(27,27,27,0.1)] bg-[rgba(27,27,27,0.2)] p-3 px-4 backdrop-blur-md transition-all duration-300 hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(27,27,27,0.35)]"
                 >
                   {/* Discord Avatar with status ring */}
                   <div className="relative">
                     <img
                       src="/assets/discord_avatar.webp"
                       alt="Discord"
-                      className="h-11 w-11 rounded-full object-cover ring-1 ring-white/15"
+                      className="h-11 w-11 rounded-full object-cover"
                     />
                     {/* Status ring at bottom right */}
                     <div
@@ -351,7 +413,7 @@ export default function App() {
                 </a>
               </div>
 
-              {/* Social Links Row (ONLY the 3 requested links: Discord, TikTok, GitHub) */}
+              {/* Social Links Row (ONLY user's 3 personal links: Discord, TikTok, GitHub) */}
               <div className="mt-[28px] flex w-full flex-wrap items-center justify-center gap-[18px]">
                 {/* 1. Discord Link */}
                 <div className="flex">
@@ -432,22 +494,22 @@ export default function App() {
               </div>
             </div>
 
-            {/* Profile Views Counter (bottom-left inside container) */}
-            <div className="absolute bottom-[12px] left-[15px] z-20">
+            {/* Profile Views Counter (bottom-left inside container, matching screenshot) */}
+            <div className="absolute bottom-[14px] left-[18px] z-20">
               <div
                 className="relative inline-flex items-center justify-center cursor-default group/views"
                 onMouseEnter={() => setShowViewsTooltip(true)}
                 onMouseLeave={() => setShowViewsTooltip(false)}
               >
-                <div className="flex items-center rounded-[10px] border-2 border-white/30 bg-[#1b1b1b]/50 px-2.5 py-1 text-white backdrop-blur-[10px]">
-                  <span className="flex items-center text-[14px] font-[550]">
+                <div className="flex items-center text-white/80 hover:text-white transition-colors">
+                  <span className="flex items-center text-[14.5px] font-[550] tracking-wide">
                     {/* Eye SVG */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="1em"
-                      height="1em"
+                      width="1.15em"
+                      height="1.15em"
                       viewBox="0 0 24 24"
-                      className="mr-[5px] text-[19px]"
+                      className="mr-[6px] text-[18px] text-white/70"
                     >
                       <path
                         fill="currentColor"
