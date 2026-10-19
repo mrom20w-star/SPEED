@@ -1,6 +1,6 @@
 {
-  "name": "@SPEED 33 | guns.lol",
-  "description": "SPEED 33",
+  "name": "@Speed33 | guns.lol",
+  "description": "Speed33",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

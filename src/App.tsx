@@ -29,7 +29,7 @@ export default function App() {
       localStorage.setItem('guns_visitor_id', visitorId);
     }
 
-    // Call server to record visit if new, or fetch current count
+    // Call server asynchronously in background without delaying anything
     fetch('/api/views', {
       method: 'POST',
       headers: {
@@ -43,16 +43,15 @@ export default function App() {
           setViews(data.count);
         }
       })
-      .catch((err) => {
-        console.warn('Could not connect to /api/views, using fallback:', err);
+      .catch(() => {
         setViews(isFirstVisitForDevice ? 1 : 1);
       });
   }, []);
 
   // Guns.lol animated title in browser tab:
-  // Types and untypes "@SPEED 33" next to the purple gun favicon
+  // Types and untypes "@Speed33" next to the purple gun favicon
   useEffect(() => {
-    const target = 'SPEED 33';
+    const target = 'Speed33';
     let r = 0;
     let a = true;
 
@@ -72,7 +71,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Instant non-blocking entry
+  // Instant 0ms response on click
   const handleEnter = () => {
     setEntered(true);
     if (audioRef.current) {
@@ -110,7 +109,7 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen w-full select-none overflow-hidden bg-[#080808] font-['Satoshi'] text-white">
-      {/* Background audio element */}
+      {/* Background audio element (optimized 650KB, instant playback) */}
       <audio
         ref={audioRef}
         src="/assets/audio.mp3"
@@ -118,31 +117,38 @@ export default function App() {
         preload="auto"
       />
 
-      {/* Base solid background */}
+      {/* Base solid background layer */}
       <div className="guns-base-bg" />
 
-      {/* Main fixed background image */}
+      {/* Exact guns.lol/light_stg background image */}
       <div
         className="guns-bg"
         style={{
-          backgroundImage: "url('/assets/background.webp')",
+          backgroundImage: "url('/assets/guns_bg.webp')",
+          backgroundPosition: '50% 50%',
+          backgroundSize: 'cover',
         }}
       />
 
-      {/* Night atmospheric overlay */}
-      <div className="guns-night-overlay" />
-
-      {/* "click to enter..." Initial Overlay */}
+      {/* Night atmospheric overlay (exact guns.lol light_stg layer) */}
       <div
-        onClick={handleEnter}
-        className={`fixed inset-0 z-[9999] flex cursor-pointer flex-col items-center justify-center gap-3.5 bg-black/75 backdrop-blur-[15px] transition-all duration-400 ease-out ${
-          entered ? 'pointer-events-none opacity-0 scale-105' : 'opacity-100 scale-100'
-        }`}
-      >
-        <div className="max-w-[1200px] px-2.5 text-center text-[30px] font-bold text-[#fafafa] tracking-wide">
-          click to enter...
+        className="guns-night-overlay"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.55)',
+        }}
+      />
+
+      {/* "click to enter..." Initial Overlay (Instant response, 0ms delay on click) */}
+      {!entered && (
+        <div
+          onClick={handleEnter}
+          className="fixed inset-0 z-[9999] flex cursor-pointer flex-col items-center justify-center gap-3.5 bg-black/75 backdrop-blur-[10px] select-none transition-opacity duration-150 active:opacity-80"
+        >
+          <div className="max-w-[1200px] px-2.5 text-center text-[30px] font-bold text-[#fafafa] tracking-wide active:scale-95 transition-transform duration-100">
+            click to enter...
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Volume Control Widget (Top Left) */}
       <div className="guns-volume-box group">
@@ -224,44 +230,38 @@ export default function App() {
       {/* Main Profile Page Content */}
       <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-[50px_15px] box-border">
         <div className="relative z-10 flex w-full max-w-[40rem] flex-col items-center gap-[15px]">
-          {/* Profile Card Container (Exact replica of the screenshot) */}
-          <div
-            className={`relative w-full rounded-[20px] bg-[#1b1b1b]/50 p-[35px_15px] pb-[52px] backdrop-blur-[10px] border-2 border-white/30 transition-all duration-600 ease-out ${
-              entered
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-6 pointer-events-none'
-            }`}
-          >
+          {/* Profile Card Container (Exact guns.lol translucent glass & border) */}
+          <div className="relative w-full rounded-[20px] bg-[#1b1b1b]/50 p-[35px_15px] pb-[52px] backdrop-blur-[10px] border-2 border-white/30 shadow-2xl">
             <div className="flex w-full flex-col items-center">
-              {/* Avatar with Discord Wings Avatar Decoration */}
-              <div className="relative flex items-center justify-center mt-2">
-                {/* Majestic Feathered Angel Wings Decoration */}
+              {/* Avatar with Discord Wings Decoration */}
+              <div className="relative flex items-center justify-center mt-6 mb-7">
+                {/* Feathered Wings Decoration lifted higher up */}
                 <img
-                  src="/assets/avatar_decoration_wings.png"
+                  src="/assets/avatar_decoration_wings.webp"
                   alt="Avatar Wings Decoration"
-                  className="pointer-events-none absolute z-10 w-[176px] h-[176px] -top-[28px] max-w-none select-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]"
+                  className="pointer-events-none absolute z-10 w-[185px] h-[185px] -top-[48px] max-w-none select-none drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]"
                 />
                 {/* Circular Profile Avatar (User's Discord Avatar) */}
                 <img
-                  src="/assets/discord_avatar.png"
+                  src="/assets/discord_avatar.webp"
                   alt="Discord Avatar"
-                  className="relative z-0 h-[118px] w-[118px] rounded-full object-cover select-none shadow-2xl"
+                  className="relative z-0 h-[118px] w-[118px] rounded-full object-cover select-none shadow-2xl ring-2 ring-white/15"
                 />
               </div>
 
-              {/* Display Name and Subtitle (ITS LIGHT / ITS LIGHT ZONE exactly as in the screenshot) */}
-              <div className="mt-[10px] flex max-w-[27rem] flex-col items-center justify-center text-center">
-                {/* Name: ITS LIGHT with Sparkle Yellow Effect & UID Tooltip */}
+              {/* Display Name and Subtitle: Speed33 with full clarity */}
+              <div className="mt-[2px] flex max-w-[27rem] flex-col items-center justify-center text-center">
+                {/* Name: Speed33 with Sparkle Yellow Effect & Glow */}
                 <div
                   className="relative inline-flex items-center justify-center cursor-default group/uid"
                   onMouseEnter={() => setShowUidTooltip(true)}
                   onMouseLeave={() => setShowUidTooltip(false)}
                 >
                   <h1 className="sparkle-username m-0 text-[39.5px] font-[600] text-white tracking-wide">
-                    ITS LIGHT
+                    Speed33
                   </h1>
 
-                  {/* Tooltip: UID 1,399,106 */}
+                  {/* Tooltip: UID 1392685347967864956 */}
                   <div
                     className={`guns-tooltip ${
                       showUidTooltip ? '!opacity-100 !scale-100 !translate-y-0' : ''
@@ -271,35 +271,35 @@ export default function App() {
                       backgroundColor: 'rgba(20, 20, 20, 0.85)',
                     }}
                   >
-                    UID 1,399,106
+                    UID 1392685347967864956
                   </div>
                 </div>
 
-                {/* Subtitle: ITS LIGHT ZONE */}
-                <h3 className="m-0 mt-[5px] text-[19px] font-[570] text-white">
-                  ITS LIGHT ZONE
+                {/* Subtitle / Description */}
+                <h3 className="m-0 mt-[5px] text-[19px] font-[570] text-white/90">
+                  33
                 </h3>
               </div>
 
-              {/* Connected Discord Profile Box (Exact match from screenshot: 5stg, ⚡ STG, ⯁ Balance, last seen unknown) */}
+              {/* Connected Discord Profile Box (Exact guns.lol styling) */}
               <div className="mt-[20px] flex w-full max-w-[28rem] justify-center">
                 <a
                   href="https://discord.com/users/1392685347967864956"
                   target="_blank"
                   rel="noreferrer"
-                  className="group/discord flex w-full items-center gap-3.5 rounded-[22px] border-2 border-[#1b1b1b]/30 bg-[#1b1b1b]/35 p-3 px-4 transition-all duration-300 hover:border-white/30 hover:bg-[#1b1b1b]/55"
+                  className="group/discord flex w-full items-center gap-3.5 rounded-[22px] border-2 border-[#1b1b1b]/30 bg-[#1b1b1b]/35 p-3 px-4 backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-[#1b1b1b]/55"
                 >
                   {/* Discord Avatar with status ring */}
                   <div className="relative">
                     <img
-                      src="/assets/avatar.webp"
+                      src="/assets/discord_avatar.webp"
                       alt="Discord"
-                      className="h-11 w-11 rounded-full object-cover ring-1 ring-white/10"
+                      className="h-11 w-11 rounded-full object-cover ring-1 ring-white/15"
                     />
                     {/* Status ring at bottom right */}
                     <div
-                      className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#1b1b1b] bg-[#747f8d]"
-                      title="Offline"
+                      className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-[#1b1b1b] bg-[#23a55a]"
+                      title="Online"
                     />
                   </div>
 
@@ -307,38 +307,30 @@ export default function App() {
                   <div className="flex flex-1 flex-col justify-center text-left">
                     <div className="flex items-center gap-2">
                       <span className="text-[16px] font-bold text-white group-hover/discord:text-[#e2b309] transition-colors">
-                        5stg
+                        Speed
                       </span>
 
-                      {/* Clan tag: ⚡ STG */}
+                      {/* Clan tag: ⚡ Speed33 */}
                       <span className="flex items-center gap-1 rounded bg-black/40 px-1.5 py-0.5 text-xs font-bold text-white">
-                        <span className="text-yellow-400">⚡</span> STG
+                        <span className="text-yellow-400">⚡</span> Speed33
                       </span>
 
-                      {/* HypeSquad Balance Cyan Triangle/Diamond Badge */}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        width="14"
-                        height="14"
-                        className="text-[#45ddc0]"
-                        fill="currentColor"
-                      >
-                        <title>HypeSquad Balance</title>
-                        <path d="M12 2L2 12l10 10 10-10L12 2zm0 4.5l6.5 5.5-6.5 5.5-6.5-5.5L12 6.5z" />
-                      </svg>
+                      {/* Nitro Badge */}
+                      <span className="flex items-center rounded bg-[#5865f2]/30 px-1.5 py-0.5 text-[10px] font-semibold text-[#5865f2]">
+                        NITRO
+                      </span>
                     </div>
 
-                    {/* Subtext: last seen unknown */}
-                    <span className="text-[12.5px] italic text-white/50">
-                      last seen unknown
+                    {/* Subtext: @mrwan0741 • Online */}
+                    <span className="text-[12.5px] text-white/60">
+                      @mrwan0741 • <span className="text-[#23a55a]">Online</span>
                     </span>
                   </div>
                 </a>
               </div>
 
-              {/* Social Links Row (Exact icons and order from screenshot: Discord, TikTok, GitHub, TikAlert) */}
-              <div className="mt-[28px] flex w-full flex-wrap items-center justify-center gap-[14px]">
+              {/* Social Links Row (ONLY the 3 requested links: Discord, TikTok, GitHub — Red icon REMOVED) */}
+              <div className="mt-[28px] flex w-full flex-wrap items-center justify-center gap-[18px]">
                 {/* 1. Discord Link */}
                 <div className="flex">
                   <a
@@ -346,7 +338,7 @@ export default function App() {
                     target="_blank"
                     rel="nofollow ugc noopener noreferrer"
                     className="flex transition-transform duration-300 hover:scale-110"
-                    title="Discord"
+                    title="Discord (@mrwan0741)"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -371,7 +363,7 @@ export default function App() {
                     target="_blank"
                     rel="nofollow ugc noopener noreferrer"
                     className="flex transition-transform duration-300 hover:scale-110"
-                    title="TikTok"
+                    title="TikTok (@mrwan3333)"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -396,7 +388,7 @@ export default function App() {
                     target="_blank"
                     rel="nofollow ugc noopener noreferrer"
                     className="flex transition-transform duration-300 hover:scale-110"
-                    title="GitHub"
+                    title="GitHub (mrom20w-star)"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -413,24 +405,6 @@ export default function App() {
                         clipRule="evenodd"
                       />
                     </svg>
-                  </a>
-                </div>
-
-                {/* 4. TikAlert Red Triangle Icon */}
-                <div className="flex">
-                  <a
-                    href="https://tikalert-eg.com/ITSLIGHT"
-                    target="_blank"
-                    rel="nofollow ugc noopener noreferrer"
-                    className="flex transition-transform duration-300 hover:scale-110"
-                    title="TikAlert"
-                  >
-                    <img
-                      src="/assets/tikalert_icon.webp"
-                      alt="TikAlert"
-                      className="h-[40px] w-[40px] object-cover"
-                      style={{ filter: 'drop-shadow(#ea2b2b 1px 0 7px)' }}
-                    />
                   </a>
                 </div>
               </div>
