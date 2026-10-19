@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 export default function App() {
-  const [entered, setEntered] = useState(false);
+  const [entered, setEntered] = useState(() => Boolean(typeof window !== 'undefined' && (window as any).__entered));
   const [views, setViews] = useState<number>(0);
   const [volume, setVolume] = useState<number>(1);
   const [isMuted, setIsMuted] = useState(false);
@@ -14,6 +14,23 @@ export default function App() {
   const [showViewsTooltip, setShowViewsTooltip] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Sync with native first-frame click listener
+  useEffect(() => {
+    const handleNativeEnter = () => {
+      setEntered(true);
+      if (audioRef.current) {
+        audioRef.current.volume = isMuted ? 0 : volume;
+        audioRef.current.play().catch(() => {});
+      }
+    };
+
+    window.addEventListener('app:entered', handleNativeEnter);
+    if ((window as any).__entered) {
+      handleNativeEnter();
+    }
+    return () => window.removeEventListener('app:entered', handleNativeEnter);
+  }, [isMuted, volume]);
 
   // Initialize and track unique device views (starts from 0)
   useEffect(() => {
@@ -73,6 +90,11 @@ export default function App() {
 
   // Instant 0ms response on click
   const handleEnter = () => {
+    (window as any).__entered = true;
+    const el = document.getElementById('initial-entry-overlay');
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
     setEntered(true);
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
@@ -138,7 +160,7 @@ export default function App() {
         }}
       />
 
-      {/* "click to enter..." Initial Overlay (Instant response, 0ms delay on click) */}
+      {/* "click to enter..." Overlay fallback */}
       {!entered && (
         <div
           onClick={handleEnter}
@@ -329,7 +351,7 @@ export default function App() {
                 </a>
               </div>
 
-              {/* Social Links Row (ONLY the 3 requested links: Discord, TikTok, GitHub — Red icon REMOVED) */}
+              {/* Social Links Row (ONLY the 3 requested links: Discord, TikTok, GitHub) */}
               <div className="mt-[28px] flex w-full flex-wrap items-center justify-center gap-[18px]">
                 {/* 1. Discord Link */}
                 <div className="flex">
